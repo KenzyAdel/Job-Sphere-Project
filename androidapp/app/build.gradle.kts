@@ -47,7 +47,8 @@ dependencies {
 
     // Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
-
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.0")
     // Firebase services
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
@@ -57,7 +58,6 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.5")
 
     // ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

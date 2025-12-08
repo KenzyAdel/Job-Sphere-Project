@@ -15,11 +15,44 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun LoginScreen() {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+fun LoginScreen(
+    onLoginSuccess: () -> Unit = {},
+    // Get the ViewModel instance
+    viewModel: loginViewModel = viewModel()
+) {
+    // Collect the UiState from the ViewModel
+    val uiState by viewModel.uiState.collectAsState()
+
+    // --- Side Effect Handling ---
+    // If login is successful, trigger navigation
+    LaunchedEffect(key1 = uiState.isLoginSuccess) {
+        if (uiState.isLoginSuccess) {
+            onLoginSuccess()
+        }
+    }
+
+    LoginContent(
+        uiState = uiState,
+        onEmailChange = viewModel::onEmailChange,
+        onPasswordChange = viewModel::onPasswordChange,
+        onLoginClick = viewModel::onLoginClick
+    )
+}
+
+// Private Composable to handle the UI drawing based on the state
+@Composable
+private fun LoginContent(
+    uiState: loginUiState,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onLoginClick: () -> Unit
+) {
+    // Local UI state for password visibility
     var passwordVisible by remember { mutableStateOf(false) }
 
     Box(
@@ -43,9 +76,10 @@ fun LoginScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // --- Email Field ---
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
+                value = uiState.email, // Use state from UiState
+                onValueChange = onEmailChange, // Call ViewModel function on change
                 label = { Text("Email") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -55,27 +89,40 @@ fun LoginScreen() {
             Spacer(modifier = Modifier.height(12.dp))
 
             OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
+                value = uiState.password, // Use state from UiState
+                onValueChange = onPasswordChange, // Call ViewModel function on change
                 label = { Text("Password") },
                 singleLine = true,
-                visualTransformation = if (passwordVisible) PasswordVisualTransformation() else PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 trailingIcon = {
-                    TextButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Text(if (passwordVisible) "Hide" else "Show")
-                    }
+                    val description = if (passwordVisible) "Hide password" else "Show password"
                 },
                 modifier = Modifier.fillMaxWidth()
             )
 
+            if (uiState.loginError != null) {
+                Text(
+                    text = uiState.loginError!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
+            // --- Login Button ---
             Button(
-                onClick = { /* TODO: Handle login */ },
+                onClick = onLoginClick, // Call ViewModel function on click
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Login")
+                if (uiState.isLoading) {
+                    // Show a progress indicator when loading
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                } else {
+                    Text("Login")
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -86,7 +133,6 @@ fun LoginScreen() {
         }
     }
 }
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
