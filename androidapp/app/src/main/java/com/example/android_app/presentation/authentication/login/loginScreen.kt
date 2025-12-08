@@ -137,6 +137,14 @@ private fun LoginContent(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreen()
+    LoginContent(
+        uiState = loginUiState(
+            email = "preview@example.com",
+            password = "123"
+        ),
+        onEmailChange = {},
+        onPasswordChange = {},
+        onLoginClick = {}
+    )
 }
 
