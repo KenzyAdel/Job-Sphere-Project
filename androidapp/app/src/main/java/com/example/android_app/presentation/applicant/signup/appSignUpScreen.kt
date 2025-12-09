@@ -41,7 +41,7 @@ fun ApplicantSignUpScreen(
     // Optional fields
     var phone by remember { mutableStateOf("") }
     var linkedIn by remember { mutableStateOf("") }
-    var portfolio by remember { mutableStateOf("") }
+    var CV by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -105,7 +105,14 @@ fun ApplicantSignUpScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
-
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedTextField(
+                value = CV,
+                onValueChange = { CV = it },
+                label = { Text("CV Link") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
             // Optional fields
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
@@ -117,6 +124,10 @@ fun ApplicantSignUpScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+
+
+
+
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
                 value = linkedIn,
@@ -126,17 +137,7 @@ fun ApplicantSignUpScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(
-                value = portfolio,
-                onValueChange = { portfolio = it },
-                label = { Text("Portfolio (Optional)") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
             Spacer(modifier = Modifier.height(16.dp))
-
             Button(
                 onClick = {
                     onSignUpClick(
@@ -145,7 +146,7 @@ fun ApplicantSignUpScreen(
                         password,
                         phone.ifBlank { null },
                         linkedIn.ifBlank { null },
-                        portfolio.ifBlank { null },
+                        CV.ifBlank { null },
                     )
                 },
                 modifier = Modifier

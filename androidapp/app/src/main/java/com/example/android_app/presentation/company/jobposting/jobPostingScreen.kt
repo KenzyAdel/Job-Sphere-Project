@@ -131,13 +131,7 @@ fun JobPostingScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Button(
-                onClick = onPause,
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
-            ) {
-                Text("Pause", color = Color.White)
-            }
+
 
             Button(
                 onClick = onDiscard,
