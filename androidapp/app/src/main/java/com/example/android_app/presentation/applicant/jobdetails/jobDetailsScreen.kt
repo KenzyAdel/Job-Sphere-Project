@@ -32,7 +32,7 @@ data class JobPosting(
 @Composable
 fun JobPostingDetailsScreen(
     job: JobPosting,
-    onApplyClick: (Uri) -> Unit = {},
+    onApplyClick: () -> Unit = {},
     onSaveClick: () -> Unit = {}
 ) {
     var resumeUri by remember { mutableStateOf<Uri?>(null) }
@@ -118,18 +118,12 @@ fun JobPostingDetailsScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(
-                onClick = { resumeLauncher.launch("*/*") },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(if (resumeUri == null) "Upload CV (Required)" else "Resume Selected")
-            }
+
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = { resumeUri?.let { onApplyClick(it) } },
-                enabled = resumeUri != null,
+                onClick = {  onApplyClick() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Apply Now")

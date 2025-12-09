@@ -35,19 +35,10 @@ fun ApplicantSignUpScreen(
         }
     }
 
-    ApplicantSignUpContent(
-        uiState = uiState,
-        onFullNameChange = viewModel::onFullNameChange,
-        onEmailChange = viewModel::onEmailChange,
-        onPasswordChange = viewModel::onPasswordChange,
-        onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
-        onPhoneChange = viewModel::onPhoneChange,
-        onLinkedInChange = viewModel::onLinkedInChange,
-        onPortfolioChange = viewModel::onPortfolioChange,
-        onSignUpClick = viewModel::onSignUpClick,
-        onNavigateToLogin = onNavigateToLogin
-    )
-}
+    // Optional fields
+    var phone by remember { mutableStateOf("") }
+    var linkedIn by remember { mutableStateOf("") }
+    var CV by remember { mutableStateOf("") }
 
 @Composable
 private fun ApplicantSignUpContent(
@@ -130,8 +121,15 @@ private fun ApplicantSignUpContent(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
-
-            // --- Optional Fields ---
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedTextField(
+                value = CV,
+                onValueChange = { CV = it },
+                label = { Text("CV Link") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            // Optional fields
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
                 value = uiState.phone,
@@ -142,6 +140,10 @@ private fun ApplicantSignUpContent(
                 modifier = Modifier.fillMaxWidth()
             )
 
+
+
+
+
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
                 value = uiState.linkedIn,
@@ -151,31 +153,18 @@ private fun ApplicantSignUpContent(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(
-                value = uiState.portfolio,
-                onValueChange = onPortfolioChange,
-                label = { Text("Portfolio (Optional)") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            // --- Error Message ---
-            if (uiState.signUpError != null) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = uiState.signUpError!!,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
             Spacer(modifier = Modifier.height(16.dp))
-
-            // --- Sign Up Button ---
             Button(
-                onClick = onSignUpClick,
-                enabled = !uiState.isLoading, // Disable while loading
+                onClick = {
+                    onSignUpClick(
+                        fullName,
+                        email,
+                        password,
+                        phone.ifBlank { null },
+                        linkedIn.ifBlank { null },
+                        CV.ifBlank { null },
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)

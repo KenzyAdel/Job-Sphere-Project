@@ -95,24 +95,6 @@ fun CompanyHomeScreen(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF333333)
                     )
-
-                    // Search Candidates Button
-                    Button(
-                        onClick = onSearchCandidates,
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4CAF50)
-                        ),
-                        modifier = Modifier.height(40.dp)
-                    ) {
-                        Icon(
-                            Icons.Filled.Search,
-                            contentDescription = "Search Candidates",
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text("Search Candidates", fontSize = 14.sp)
-                    }
                 }
 
                 Spacer(Modifier.height(16.dp))
@@ -230,40 +212,16 @@ fun JobCard(
                         Spacer(Modifier.height(4.dp))
                         Text("Salary: $it", fontSize = 14.sp, color = Color.Gray)
                     }
-
-                    if (!job.isActive) {
-                        Spacer(Modifier.height(6.dp))
-                        Text(
-                            "Paused → Edit & Post",
-                            fontSize = 13.sp,
-                            color = Color(0xFFF57C00),
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
                 }
 
-                // Dropdown menu at the top-right
-                Box {
-                    IconButton(onClick = { menuExpanded = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Options")
-                    }
-                    DropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text("Edit") },
-                            onClick = { menuExpanded = false; onEdit(job.id) }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(if (job.isActive) "Pause" else "Resume") },
-                            onClick = { menuExpanded = false; onToggleStatus(job.id) }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Delete", color = Color.Red) },
-                            onClick = { menuExpanded = false; onDelete(job.id) }
-                        )
-                    }
+                Button(
+                    onClick = { /* Handle delete action */ },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.8f)), // Use a distinct color for deletion
+                    // Optional: Use a smaller size or an icon-only button for better fit
+                ) {
+                    Text("Delete", color = Color.White)
+                    // You might consider an Icon for a more compact design:
+                    // Icon(Icons.Filled.Delete, contentDescription = "Delete Job", tint = Color.White)
                 }
             }
 

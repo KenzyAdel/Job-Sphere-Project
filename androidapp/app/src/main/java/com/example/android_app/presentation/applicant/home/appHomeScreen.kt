@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun ApplicantHomeScreen(
     jobs: List<JobItem>,
-    onProfileClick: () -> Unit = {},
+    onLogoutClick: () -> Unit = {},
     onViewDetailsClick: (JobItem) -> Unit = {}
 ) {
     var selectedFilter by remember { mutableStateOf("Filter by") }
@@ -41,45 +41,20 @@ fun ApplicantHomeScreen(
                 fontWeight = FontWeight.Bold
             )
 
-            Button(onClick = onProfileClick, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E24AA))) {
-                Text("Profile")
+            Button(onClick = onLogoutClick, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E24AA))) {
+                Text("Logout")
             }
         }
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Search bar
-        OutlinedTextField(
-            value = "",
-            onValueChange = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            placeholder = { Text("Search jobs...") }
-        )
+
 
         Spacer(modifier = Modifier.height(10.dp))
 
         // Filter Dropdown
         var expanded by remember { mutableStateOf(false) }
 
-        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-            Button(onClick = { expanded = true }, colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF8E24AA))) {
-                Text(selectedFilter)
-            }
-
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                filters.forEach { filter ->
-                    DropdownMenuItem(
-                        text = { Text(filter) },
-                        onClick = {
-                            selectedFilter = filter
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
