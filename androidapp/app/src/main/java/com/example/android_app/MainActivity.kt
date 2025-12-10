@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import com.example.android_app.presentation.company.signup.CompanySignUpScreen
 import com.example.android_app.presentation.applicant.signup.ApplicantSignUpScreen// 1. Import the sign-up screen
 import com.example.android_app.presentation.authentication.login.LoginScreen
+import com.example.android_app.presentation.navigation.AppNavigation
 import com.example.android_app.ui.theme.AndroidappTheme
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -35,28 +36,12 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize()
                 ) {
                     // 2. Set your companySignUpScreen as the content
-                    LoginScreen()
+                   // LoginScreen()
+
+                    AppNavigation()
                 }
             }
         }
     }
 }
 
-// You can now remove the Greeting and GreetingPreview functions as they are no longer used.
-/*
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello sir $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AndroidappTheme {
-        Greeting("Android")
-    }
-}
-*/

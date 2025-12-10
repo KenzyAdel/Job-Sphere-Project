@@ -18,21 +18,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.ui.text.input.ImeAction
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit = {},
-    // Get the ViewModel instance
+    onLoginSuccess: (UserRole) -> Unit, // CHANGED: Now accepts UserRole parameter
+    onNavigateToSignUp: () -> Unit = {},
     viewModel: loginViewModel = viewModel()
 ) {
     // Collect the UiState from the ViewModel
     val uiState by viewModel.uiState.collectAsState()
 
-    // --- Side Effect Handling ---
-    // If login is successful, trigger navigation
-    LaunchedEffect(key1 = uiState.isLoginSuccess) {
-        if (uiState.isLoginSuccess) {
-            onLoginSuccess()
+    // --- NEW: Handle login success with role ---
+    LaunchedEffect(key1 = uiState.loginSuccessRole) {
+        uiState.loginSuccessRole?.let { role ->
+            onLoginSuccess(role) // Navigate with the role
+            // Reset after navigation
+            viewModel.onLoginSuccessNavigated()
         }
     }
 
@@ -40,7 +45,8 @@ fun LoginScreen(
         uiState = uiState,
         onEmailChange = viewModel::onEmailChange,
         onPasswordChange = viewModel::onPasswordChange,
-        onLoginClick = viewModel::onLoginClick
+        onLoginClick = viewModel::onLoginClick,
+        onNavigateToSignUp = onNavigateToSignUp
     )
 }
 
@@ -50,7 +56,8 @@ private fun LoginContent(
     uiState: loginUiState,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    onNavigateToSignUp: () -> Unit
 ) {
     // Local UI state for password visibility
     var passwordVisible by remember { mutableStateOf(false) }
@@ -78,25 +85,40 @@ private fun LoginContent(
 
             // --- Email Field ---
             OutlinedTextField(
-                value = uiState.email, // Use state from UiState
-                onValueChange = onEmailChange, // Call ViewModel function on change
+                value = uiState.email,
+                onValueChange = onEmailChange,
                 label = { Text("Email") },
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // --- Password Field ---
             OutlinedTextField(
-                value = uiState.password, // Use state from UiState
-                onValueChange = onPasswordChange, // Call ViewModel function on change
+                value = uiState.password,
+                onValueChange = onPasswordChange,
                 label = { Text("Password") },
                 singleLine = true,
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password,
+                    imeAction = ImeAction.Done
+                ),
+                // visibility toggle
                 trailingIcon = {
-                    val description = if (passwordVisible) "Hide password" else "Show password"
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Filled.VisibilityOff
+                            else Icons.Filled.Visibility,
+                            contentDescription = if (passwordVisible) "Hide password"
+                            else "Show password"
+                        )
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -114,12 +136,17 @@ private fun LoginContent(
 
             // --- Login Button ---
             Button(
-                onClick = onLoginClick, // Call ViewModel function on click
-                modifier = Modifier.fillMaxWidth()
+                onClick = onLoginClick,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !uiState.isLoading &&
+                        uiState.email.isNotBlank() &&
+                        uiState.password.isNotBlank() // Optional: Enable only when fields are filled
             ) {
                 if (uiState.isLoading) {
-                    // Show a progress indicator when loading
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(24.dp)
+                    )
                 } else {
                     Text("Login")
                 }
@@ -127,8 +154,15 @@ private fun LoginContent(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            TextButton(onClick = { /* TODO: Navigate to register screen */ }) {
-                Text("Don't have an account? Sign up")
+            // --- Sign Up Text Button ---
+            TextButton(
+                onClick = onNavigateToSignUp,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Don't have an account? Sign up",
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
@@ -144,7 +178,7 @@ fun LoginScreenPreview() {
         ),
         onEmailChange = {},
         onPasswordChange = {},
-        onLoginClick = {}
+        onLoginClick = {},
+        onNavigateToSignUp = {}
     )
 }
-
