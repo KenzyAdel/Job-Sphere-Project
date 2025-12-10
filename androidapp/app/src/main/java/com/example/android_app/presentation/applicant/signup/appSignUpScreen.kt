@@ -130,15 +130,8 @@ private fun ApplicantSignUpContent(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(12.dp))
-            OutlinedTextField(
-                value = CV,
-                onValueChange = { CV = it },
-                label = { Text("CV Link") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-            // Optional fields
+
+            // --- Optional Fields ---
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
                 value = uiState.phone,
@@ -148,10 +141,6 @@ private fun ApplicantSignUpContent(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 modifier = Modifier.fillMaxWidth()
             )
-
-
-
-
 
             Spacer(modifier = Modifier.height(12.dp))
             OutlinedTextField(
@@ -182,17 +171,11 @@ private fun ApplicantSignUpContent(
             }
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // --- Sign Up Button ---
             Button(
-                onClick = {
-                    onSignUpClick(
-                        fullName,
-                        email,
-                        password,
-                        phone.ifBlank { null },
-                        linkedIn.ifBlank { null },
-                        CV.ifBlank { null },
-                    )
-                },
+                onClick = onSignUpClick,
+                enabled = !uiState.isLoading, // Disable while loading
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp)
