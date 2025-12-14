@@ -8,7 +8,6 @@ data class Applicant(
     val phone: String = "",
     val name: String = ""
 ) {
-    // Convert to HashMap for Firestore
     fun toHashMap(): HashMap<String, Any> {
         return hashMapOf(
             "CV-Link" to cvLink,
@@ -20,7 +19,6 @@ data class Applicant(
     }
 
     companion object {
-        // Create from Firestore document
         fun fromFirestore(id: String, data: Map<String, Any>): Applicant {
             return Applicant(
                 id = id,

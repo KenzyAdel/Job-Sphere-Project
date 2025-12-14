@@ -1,6 +1,4 @@
-// Updated JobDetailsScreen aligned with job posting fields
 package com.example.android_app.presentation.applicant.jobdetails
-
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -9,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,19 +19,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// New JobPosting model aligned with your posting screen
-data class JobPosting(
-    val title: String,
-    val location: String,
-    val salary: String,
-    val description: String,
-    val responsibilities: String,
-    val requirements: String
-)
-
 @Composable
 fun JobPostingDetailsScreen(
     job: JobPosting,
+    isSaved: Boolean = false, // Track if job is currently saved
+    onBackClick: () -> Unit = {},
     onApplyClick: () -> Unit = {},
     onSaveClick: () -> Unit = {}
 ) {
@@ -40,12 +32,25 @@ fun JobPostingDetailsScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri -> resumeUri = uri }
 
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF3F3F3))
             .padding(16.dp)
     ) {
+        IconButton(
+            onClick = onBackClick,
+            modifier = Modifier.padding(bottom = 8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                tint = Color.Black
+            )
+        }
+
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -134,9 +139,12 @@ fun JobPostingDetailsScreen(
             OutlinedButton(
                 onClick = onSaveClick,
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = if (isSaved) Color(0xFFE53935) else Color(0xFF4CAF50)
+                )
             ) {
-                Text("Save Job")
+                Text(if (isSaved) "Unsave Job" else "Save Job")
             }
         }
     }
