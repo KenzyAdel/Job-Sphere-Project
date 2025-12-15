@@ -8,9 +8,11 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
 import com.example.android_app.presentation.company.signup.CompanySignUpScreen
 import com.example.android_app.presentation.applicant.signup.ApplicantSignUpScreen// 1. Import the sign-up screen
 import com.example.android_app.presentation.authentication.login.LoginScreen
+import com.example.android_app.presentation.navigation.AppNavigationGraph
 import com.example.android_app.ui.theme.AndroidappTheme
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -18,45 +20,14 @@ import com.google.firebase.ktx.Firebase
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // This is good for initial testing, you can keep or remove it
-        try {
-            Firebase.auth
-            Log.d("FirebaseTest", "✅ Firebase initialized successfully!")
-        } catch (e: Exception) {
-            Log.e("FirebaseTest", "❌ Firebase initialization failed: ${e.message}")
-        }
-
-        enableEdgeToEdge()
         setContent {
-            AndroidappTheme {
-                // Use a Surface for better background color handling
-                Surface(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    // 2. Set your companySignUpScreen as the content
-                    LoginScreen()
-                }
-            }
+            // wrap this in your theme if you have one, e.g. AndroidAppTheme { ... }
+
+            // 1. Create the NavController
+            val navController = rememberNavController()
+
+            // 2. Call your Navigation Graph
+            AppNavigationGraph(navController = navController)
         }
     }
 }
-
-// You can now remove the Greeting and GreetingPreview functions as they are no longer used.
-/*
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello sir $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AndroidappTheme {
-        Greeting("Android")
-    }
-}
-*/

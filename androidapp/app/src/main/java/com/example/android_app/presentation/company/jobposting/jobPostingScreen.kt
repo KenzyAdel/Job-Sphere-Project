@@ -3,6 +3,7 @@ package com.example.android_app.presentation.company.jobposting
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -15,7 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 // ----------------------
 // TOP BAR
@@ -49,20 +50,23 @@ fun JobPostingTopBar(onBack: () -> Unit = {}) {
 // ----------------------
 @Composable
 fun JobPostingScreen(
-    onPause: () -> Unit = {},
+    viewModel: JobPostingViewModel = viewModel(),
+    onBack: () -> Unit = {},
     onDiscard: () -> Unit = {},
     onPost: () -> Unit = {}
 ) {
-    var title by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
-    var salary by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var responsibilities by remember { mutableStateOf("") }
-    var requirements by remember { mutableStateOf("") }
+    val state by viewModel.uiState.collectAsState()
 
-    // Job Type dropdown
+    // Handle success navigation
+    LaunchedEffect(state.isPostSuccess) {
+        if (state.isPostSuccess) {
+            onPost()
+            viewModel.resetState()
+        }
+    }
+
+    // Job Type dropdown state
     var expanded by remember { mutableStateOf(false) }
-    var selectedJobType by remember { mutableStateOf("Full Time") }
     val jobTypes = listOf("Full Time", "Part Time", "Intern", "Remote")
 
     Column(
@@ -72,25 +76,67 @@ fun JobPostingScreen(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        JobPostingTopBar()
+        JobPostingTopBar(onBack = onBack)
 
         Spacer(Modifier.height(16.dp))
+        
+        // Error Message Display
+        state.errorMessage?.let { error ->
+            Text(
+                text = error,
+                color = Color.Red,
+                modifier = Modifier.padding(bottom = 8.dp),
+                fontWeight = FontWeight.Bold
+            )
+        }
 
         // TextFields
-        JobTextField(label = "Job Title", value = title, onValueChange = { title = it })
+        JobTextField(
+            label = "Job Title", 
+            value = state.title, 
+            onValueChange = viewModel::onTitleChange
+        )
         Spacer(Modifier.height(12.dp))
-        JobTextField(label = "Location", value = location, onValueChange = { location = it })
+        
+        JobTextField(
+            label = "Location", 
+            value = state.location, 
+            onValueChange = viewModel::onLocationChange
+        )
         Spacer(Modifier.height(12.dp))
-        JobTextField(label = "Salary (Optional)", value = salary, onValueChange = { salary = it })
+        
+        JobTextField(
+            label = "Salary (Optional)", 
+            value = state.salary, 
+            onValueChange = viewModel::onSalaryChange
+        )
         Spacer(Modifier.height(12.dp))
-        JobTextField(label = "Description", value = description, onValueChange = { description = it }, singleLine = false)
+        
+        JobTextField(
+            label = "Description", 
+            value = state.description, 
+            onValueChange = viewModel::onDescriptionChange, 
+            singleLine = false
+        )
         Spacer(Modifier.height(12.dp))
-        JobTextField(label = "Responsibilities", value = responsibilities, onValueChange = { responsibilities = it }, singleLine = false)
+        
+        JobTextField(
+            label = "Responsibilities", 
+            value = state.responsibilities, 
+            onValueChange = viewModel::onResponsibilitiesChange, 
+            singleLine = false
+        )
         Spacer(Modifier.height(12.dp))
-        JobTextField(label = "Requirements", value = requirements, onValueChange = { requirements = it }, singleLine = false)
+        
+        JobTextField(
+            label = "Requirements", 
+            value = state.requirements, 
+            onValueChange = viewModel::onRequirementsChange, 
+            singleLine = false
+        )
         Spacer(Modifier.height(12.dp))
 
-        // Job Type in the same row
+        // Job Type Dropdown
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
@@ -104,7 +150,7 @@ fun JobPostingScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7B1FA2)),
                     shape = RoundedCornerShape(20.dp)
                 ) {
-                    Text(selectedJobType, color = Color.White)
+                    Text(state.selectedJobType, color = Color.White)
                 }
 
                 DropdownMenu(
@@ -115,7 +161,7 @@ fun JobPostingScreen(
                         DropdownMenuItem(
                             text = { Text(type) },
                             onClick = {
-                                selectedJobType = type
+                                viewModel.onJobTypeChange(type)
                                 expanded = false
                             }
                         )
@@ -126,13 +172,11 @@ fun JobPostingScreen(
 
         Spacer(Modifier.height(24.dp))
 
-        // Buttons: Pause, Discard, Post
+        // Action Buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
-
             Button(
                 onClick = onDiscard,
                 modifier = Modifier.weight(1f),
@@ -142,11 +186,20 @@ fun JobPostingScreen(
             }
 
             Button(
-                onClick = onPost,
+                onClick = viewModel::onPostJob,
                 modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7B1FA2))
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7B1FA2)),
+                enabled = !state.isLoading
             ) {
-                Text("Post", color = Color.White)
+                if (state.isLoading) {
+                    CircularProgressIndicator(
+                        color = Color.White, 
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Post", color = Color.White)
+                }
             }
         }
 
@@ -158,13 +211,19 @@ fun JobPostingScreen(
 // REUSABLE TEXTFIELD
 // ----------------------
 @Composable
-fun JobTextField(label: String, value: String, onValueChange: (String) -> Unit, singleLine: Boolean = true) {
+fun JobTextField(
+    label: String, 
+    value: String, 
+    onValueChange: (String) -> Unit, 
+    singleLine: Boolean = true
+) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         label = { Text(label) },
         singleLine = singleLine,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        minLines = if (singleLine) 1 else 3
     )
 }
 

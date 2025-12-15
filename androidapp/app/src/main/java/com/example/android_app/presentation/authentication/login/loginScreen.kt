@@ -18,10 +18,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.android_app.presentation.navigation.UserType
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit = {},
+    onNavigateFromSignUp: () -> Unit,
+    onLoginSuccess: (UserType) -> Unit,
     // Get the ViewModel instance
     viewModel: loginViewModel = viewModel()
 ) {
@@ -29,10 +31,12 @@ fun LoginScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     // --- Side Effect Handling ---
-    // If login is successful, trigger navigation
-    LaunchedEffect(key1 = uiState.isLoginSuccess) {
-        if (uiState.isLoginSuccess) {
-            onLoginSuccess()
+    // Listen for the specific UserType (Applicant or Company)
+    LaunchedEffect(key1 = uiState.loginSuccessUserType) {
+        // If it is not null, it means login succeeded and we know who it is
+        uiState.loginSuccessUserType?.let { userType ->
+            onLoginSuccess(userType) // <--- FIX: Passing the required parameter
+            viewModel.onLoginSuccessHandled() // Reset state so back button works
         }
     }
 
@@ -40,7 +44,8 @@ fun LoginScreen(
         uiState = uiState,
         onEmailChange = viewModel::onEmailChange,
         onPasswordChange = viewModel::onPasswordChange,
-        onLoginClick = viewModel::onLoginClick
+        onLoginClick = viewModel::onLoginClick,
+        onSignUpClick = onNavigateFromSignUp
     )
 }
 
@@ -50,7 +55,8 @@ private fun LoginContent(
     uiState: loginUiState,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    onLoginClick: () -> Unit
+    onLoginClick: () -> Unit,
+    onSignUpClick: () -> Unit
 ) {
     // Local UI state for password visibility
     var passwordVisible by remember { mutableStateOf(false) }
@@ -127,7 +133,7 @@ private fun LoginContent(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            TextButton(onClick = { /* TODO: Navigate to register screen */ }) {
+            TextButton(onClick =  onSignUpClick ) {
                 Text("Don't have an account? Sign up")
             }
         }
@@ -144,7 +150,8 @@ fun LoginScreenPreview() {
         ),
         onEmailChange = {},
         onPasswordChange = {},
-        onLoginClick = {}
+        onLoginClick = {},
+        onSignUpClick = {}
     )
 }
 
